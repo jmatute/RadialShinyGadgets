@@ -1,4 +1,6 @@
+## Installation
 
+    devtools::install_github(repo = "jmatute/StarCoordinates-RShinyGadget", ref="main"
 
 ## Star Coordinates
 
