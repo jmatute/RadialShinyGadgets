@@ -2,7 +2,7 @@
 
 ## Star Coordinates
 
-The following package is creates a RShiny Gadget for Star Coordinates which allows for initial data exploration. 
+The following package creates a RShiny Gadget for Star Coordinates Plot which can be used for initial data exploration. 
 
 
 * **param** *df:*  A dataframe with the data to explore. It should contain only numeric or factor columns.
