@@ -33,7 +33,7 @@ StarCoordinates(
 A list with the projection matrix, coordinates of the projected samples and a logical vector with the selected samples
 }
 \description{
-Creates a RShiny Gadget with
+Creates a RShiny Gadget for Star Coordinates
 }
 \examples{
 library(datasets)

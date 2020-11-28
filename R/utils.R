@@ -17,7 +17,7 @@ library(shiny)
 #' @import ggplot2
 library(ggplot2)
 
-#' @importFrom shinyjs onevent
+#' @importFrom shinyjs onevent useShinyjs
 import::from(shinyjs, onevent, useShinyjs)
 
 #' @import caret
