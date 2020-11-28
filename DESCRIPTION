@@ -1,0 +1,14 @@
+Package: RadialVisGadgets
+Type: Package
+Title: Gadgets for Radial Visualization Approaches
+Version: 0.1.0
+Author: José Matute
+Imports: import, ggplot2, tidyverse, dplyr, miniUI, shiny, shinyjs, caret
+Maintainer: José Matute <jmatuteflores@gmail.com>
+Description: A package containing common interactive gadgets using Star  visualization.
+    Star Coordinates as proposed by Kandogan or Orthographic Cordinates..
+    Data transformations: Standard, Mixed and/or centering.  
+License: MIT + file LICENCE 
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
