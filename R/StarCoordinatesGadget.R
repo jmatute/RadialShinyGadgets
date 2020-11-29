@@ -14,16 +14,19 @@ source("./R/utils.R")
 #' @return A list with the projection matrix, coordinates of the projected samples and a logical vector with the selected samples
 #' @export
 #' @examples
-#' library(datasets)
-#' data(iris)
-#' # StarCoordinates(iris, "Species")
+#' if (interactive()) {
+#'  library(RadialVisGadgets)
+#'  library(datasets)
+#'  data(iris)
+#'  StarCoordinates(iris, "Species")
+#' }
 
 StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRepresentation=TRUE, meanCentered = TRUE, projMatrix=NULL, clusterFunc = NULL) {
 
   #######################################################################
   # Simple Pre-processing, validate input to function and create data that
   # won't change throughout the running of the gadget
-  inputCheck <- inputValidation(df,  colorVar,  approach, projectionMatrix, clusterFunc )
+  inputCheck <- inputValidation(df,  colorVar,  approach, projMatrix, clusterFunc )
   if (!is.null(inputCheck)){
       if (inputCheck$stop)  stop(inputCheck$errorMessage)
       else warning(inputCheck$errorMessage)
@@ -135,7 +138,7 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
                        nameDim <- colnames(df)[currentClosest]
                        if( is.factor(df[[nameDim]])){
                              if  ( highlightedCat() != -1){
-                                    highlightedCat(-y1)
+                                    highlightedCat(-1)
                                     helperValues$lbl <- NULL
                                     highlightedCatValue(NULL)
                              }
@@ -225,8 +228,9 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
 
         stopApp(result)
       })
-   }
-   runGadget(ui, server)
+  }
+   viewer <- paneViewer(300)
+   runGadget(ui, server, viewer=viewer)
 }
 
 

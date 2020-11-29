@@ -3,7 +3,10 @@ Type: Package
 Title: Gadgets for Radial Visualization Approaches
 Version: 0.1.0
 Author: José Matute
-Imports: import, ggplot2, tidyverse, dplyr, miniUI, shiny, shinyjs, caret
+Author@R: person("José", "Matute", email = "jmatuteflores@gmail.com", 
+  role = c("aut", "cre"))
+URL: https://github.com/jmatute/StarCoordinates-RShinyGadget
+Imports: import, ggplot2, tidyr, dplyr, miniUI, shiny, shinyjs, caret, rlang
 Maintainer: José Matute <jmatuteflores@gmail.com>
 Description: A package containing common interactive gadgets using Star  visualization.
     Star Coordinates as proposed by Kandogan or Orthographic Cordinates..

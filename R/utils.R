@@ -1,8 +1,8 @@
 #' @import import
 library(import)
 
-#' @import tidyverse
-library(tidyverse)
+#' @import tidyr
+library(tidyr)
 
 #' @import dplyr
 library(dplyr)
@@ -25,6 +25,10 @@ library(caret)
 
 #' @importFrom stats complete.cases
 import::from(stats,complete.cases)
+
+#' @import  rlang
+library(rlang)
+
 
 #######################################################################
 #  Pre-processing functions
@@ -150,13 +154,13 @@ getGGHints <- function(projectionMatrix, possibleActions){
   newProjectionMatrix["vector"] <- row.names(projectionMatrix)
   actions <- left_join(possibleActions, newProjectionMatrix, by="vector")
 
-  newActions <- actions %>% rowwise() %>% mutate(stx=switch(as.character(action), "inc" = .data$V1*0.5, "dec" = 0.0, "cw" = .data$V1, "ccw" = .data$V1)) %>%
-    mutate(sty=switch(as.character(action), "inc" = .data$V2*0.5, "dec" = 0.0, "cw" = .data$V2, "ccw" = .data$V2)) %>%
-    mutate(etx=switch(as.character(action), "inc" = .data$V1, "dec" = V1*0.5,  "cw" = .data$x, "ccw" = .data$x)) %>%
-    mutate(ety=switch(as.character(action), "inc" = .data$V2, "dec" = V2*0.5,  "cw" = .data$y, "ccw" = .data$y)) %>%
-    mutate(width = 0.5 + rangedDiff) # Change the sit
+  newActions <- actions %>% rowwise() %>% mutate(stx=switch(as.character(.data$action), "inc" = .data$V1*0.5, "dec" = 0.0, "cw" = .data$V1, "ccw" = .data$V1)) %>%
+    mutate(sty=switch(as.character(.data$action), "inc" = .data$V2*0.5, "dec" = 0.0, "cw" = .data$V2, "ccw" = .data$V2)) %>%
+    mutate(etx=switch(as.character(.data$action), "inc" = .data$V1, "dec" = .data$V1*0.5,  "cw" = .data$x, "ccw" = .data$x)) %>%
+    mutate(ety=switch(as.character(.data$action), "inc" = .data$V2, "dec" = .data$V2*0.5,  "cw" = .data$y, "ccw" = .data$y)) %>%
+    mutate(width = 0.5 + .data$rangedDiff) # Change the sit
 
-  segments <- geom_segment(aes(x = stx, y = sty, xend = etx, yend = ety, size=width), lineend = "round", data = newActions, show.legend = FALSE)
+  segments <- geom_segment(aes(x = .data$stx, y = .data$sty, xend = .data$etx, yend = .data$ety, size=.data$width), lineend = "round", data = newActions, show.legend = FALSE)
   invisible(segments)
 }
 
@@ -170,7 +174,7 @@ insideCategoricalValueGG  <- function(projectionMatrix, catName, cumulativeList,
     cumulativeName <- paste0(catName,".Cumulative")
     cumulativeFreq <- paste0(catName,".freq")
     curCumulativeTable  <- curCumulativeTable %>% mutate(bcx= (.data[[cumulativeName]] - .data[[cumulativeFreq]]*0.5) * dirVector$V1 ) %>% mutate(bcy= (.data[[cumulativeName]] - .data[[cumulativeFreq]]*0.5) * dirVector$V2 )
-    element <- geom_label( data=curCumulativeTable,  aes(bcx, bcy,label=.data[[catName]]))
+    element <- geom_label( data=curCumulativeTable,  aes(.data$bcx, .data$bcy,label=.data[[catName]]))
   }
   invisible(element)
 }
@@ -196,7 +200,7 @@ getGGProjectedPoints <- function(projectionMatrix, rangedData, oData,  colorVar=
   }
 
   if (is.null(colorVar))
-    drawnPoints <- geom_point(data=projectedPoints, aes(V1,V2),colour = "black", shape=20, size=2, alpha=0.3)
+    drawnPoints <- geom_point(data=projectedPoints, aes(.data$V1,.data$V2),colour = "black", shape=20, size=2, alpha=0.3)
   else {
     drawnPoints <-  geom_point(data=projectedPoints, aes_string(x="V1",y="V2", colour = oData[[colorVar]]), shape=20, size=2, alpha=0.3)
   }
@@ -229,8 +233,8 @@ getActionHints <- function(projectionMatrix, rangedData, oData, colorVar , clust
 
   changesInPts <- projectionMatrix %>% mutate_at(c("V1","V2"), list(inc=increase, dec=decrease)) %>%
     mutate(angle= atan2(.data$V2,.data$V1)) %>% mutate_at( c("angle"), list(cw=clockwise, ccw = counterClockwise)) %>%
-    mutate(V1_cw =  cos(cw)*sqrt(.data$V1^2 + .data$V2^2)  )  %>%   mutate(V2_cw =  sin(cw)*sqrt(.data$V1^2 + .data$V2^2)  )  %>%
-    mutate(V1_ccw =  cos(ccw)*sqrt(.data$V1^2 + .data$V2^2)  )  %>%   mutate(V2_ccw =  sin(ccw)*sqrt(.data$V1^2 + .data$V2^2)  )
+    mutate(V1_cw =  cos(.data$cw)*sqrt(.data$V1^2 + .data$V2^2)  )  %>%   mutate(V2_cw =  sin(.data$cw)*sqrt(.data$V1^2 + .data$V2^2)  )  %>%
+    mutate(V1_ccw =  cos(.data$ccw)*sqrt(.data$V1^2 + .data$V2^2)  )  %>%   mutate(V2_ccw =  sin(.data$ccw)*sqrt(.data$V1^2 + .data$V2^2)  )
 
   row.names(changesInPts) <- row.names(projectionMatrix)
 
@@ -239,7 +243,7 @@ getActionHints <- function(projectionMatrix, rangedData, oData, colorVar , clust
 
   origVal <- getValueAtFunc(projectionMatrix, rangedData , oData, colorVar , clusterFunc)
   # Create a data frame where each action per vector is a row
-  possibleActions <- data.frame(actions=c(outer(vectors, actions, FUN=paste)) ) %>% separate(actions, into=c("vector","action"),sep=" ")
+  possibleActions <- data.frame(actions=c(outer(vectors, actions, FUN=paste)) ) %>% tidyr::separate(actions, into=c("vector","action"),sep=" ")
   possibleActions["val"] <- NA
   possibleActions["x"] <- NA
   possibleActions["y"] <- NA
@@ -257,7 +261,7 @@ getActionHints <- function(projectionMatrix, rangedData, oData, colorVar , clust
     possibleActions[rowIdx,]$val <- getValueAtFunc(newProjection, rangedData , oData, colorVar , clusterFunc)
   }
   # The clustering function assumes that a larger value is better.
-  possibleActions <- possibleActions %>% mutate(diff= ifelse(val - origVal>0, val - origVal,0)) %>% mutate(rangedDiff= diff/max(diff))
+  possibleActions <- possibleActions %>% mutate(diff= ifelse(.data$val - origVal>0, .data$val - origVal,0)) %>% mutate(rangedDiff= diff/max(diff))
   invisible(possibleActions)
 }
 
@@ -368,14 +372,14 @@ drawDimensionVectors <- function(projectionMatrix, highlightedIdx, highlightedCa
         shapes[highlightedCat] = 20
    }
    # Draw the labels + the point that can be selected to move the vectors
-   pts <- geom_point(data=projectionMatrix, aes(V1,V2), colour = "black", fill = "white", shape=shapes, size=sizes)
-   labels <-  geom_label( data=projectionMatrix,  aes(V1+V1*0.2,V2+V2*0.2,label=rownames(projectionMatrix)))
+   pts <- geom_point(data=projectionMatrix, aes(.data$V1,.data$V2), colour = "black", fill = "white", shape=shapes, size=sizes)
+   labels <-  geom_label( data=projectionMatrix,  aes(.data$V1+.data$V1*0.2,.data$V2+.data$V2*0.2,label=rownames(projectionMatrix)))
    #draw the background circle
-   backgroundCircle <- geom_path(data=circle, aes(x,y), alpha=0.2)
+   backgroundCircle <- geom_path(data=circle, aes(.data$x, .data$y), alpha=0.2)
    # Create a path for the vectors, by simply adding (0,0) in between the locations
    origin <- data.frame(x = 0, y = 0)
    lines <- do.call(rbind, apply(projectionMatrix, 1, function(x) {rbind(x,  origin )}))
-   vectors <- geom_path(data=lines, aes(x,y))
+   vectors <- geom_path(data=lines, aes(.data$x,.data$y))
    ## if it is non-numeric representation
 
    curPlot <- ggplot() + pts+ labels +vectors+ backgroundCircle
@@ -393,8 +397,8 @@ drawDimensionVectors <- function(projectionMatrix, highlightedIdx, highlightedCa
           curCumulativeTable <- cumulativeList[[catName]]$table
 
           curCumulativeTable  <- curCumulativeTable %>% mutate(cx= .data[[cumulativeName]] * dirVector$x ) %>% mutate(cy= .data[[cumulativeName]] * dirVector$y )
-          curCumulativeTable  <- curCumulativeTable %>% mutate(tsx = cx  +  0.02 * ortho[1]) %>% mutate(tex = cx +  -0.02 * ortho[1])
-          curCumulativeTable  <- curCumulativeTable %>% mutate(tsy = cy  +  0.02 * ortho[2]) %>% mutate(tey = cy +  -0.02 * ortho[2])
+          curCumulativeTable  <- curCumulativeTable %>% mutate(tsx = .data$cx  +  0.02 * ortho[1]) %>% mutate(tex = .data$cx +  -0.02 * ortho[1])
+          curCumulativeTable  <- curCumulativeTable %>% mutate(tsy = .data$cy  +  0.02 * ortho[2]) %>% mutate(tey = .data$cy +  -0.02 * ortho[2])
 
           drawCat <-  highlightedIdx != -1 && catName %in%  rownames(projectionMatrix)[highlightedIdx]
           drawCat <- drawCat || (  highlightedCat != -1 && catName %in%  rownames(projectionMatrix)[highlightedCat] )
@@ -403,17 +407,18 @@ drawDimensionVectors <- function(projectionMatrix, highlightedIdx, highlightedCa
             curCumulativeTable  <- curCumulativeTable %>% mutate(bcx= (.data[[cumulativeName]] - .data[[cumulativeFreq]]) * dirVector$x ) %>% mutate(bcy= (.data[[cumulativeName]] - .data[[cumulativeFreq]]) * dirVector$y )
             curCumulativeTable  <- curCumulativeTable %>% mutate(bsx = .data$bcx  +  0.02 * ortho[1]) %>% mutate(bex = .data$bcx +  -0.02 * ortho[1])
             curCumulativeTable  <- curCumulativeTable %>% mutate(bsy = .data$bcy  +  0.02 * ortho[2]) %>% mutate(bey = .data$bcy +  -0.02 * ortho[2])
-            curCumulativeTable  <- curCumulativeTable %>%  gather( orig_x, x , c(tsx, tex, bex, bsx)) %>%  gather( orig_y, y , c(tsy, tey, bey, bsy))  %>% mutate( orig_x=substr(orig_x,1,2)) %>% mutate( orig_y=substr(orig_y,1,2)) %>% filter(orig_x == orig_y)
+            curCumulativeTable  <- curCumulativeTable %>%  tidyr::gather( .data$orig_x, x , c(.data$tsx, .data$tex, .data$bex, .data$bsx)) %>%  gather( .data$orig_y, y , c(.data$tsy, .data$tey, .data$bey, .data$bsy))  %>% 
+                                                           mutate( orig_x=substr(.data$orig_x,1,2)) %>% mutate( orig_y=substr(.data$orig_y,1,2)) %>% filter(.data$orig_x == .data$orig_y)
 
             if ( !is.null(highlightedCatValue)){
                  curCumulativeTable <- curCumulativeTable %>% mutate(fillC = ifelse( .data[[catName]] == highlightedCatValue, "1", "0")  )
-                 curPlot <- curPlot + geom_polygon(data=curCumulativeTable, colour="black",  alpha=0.4, show.legend=FALSE,mapping=aes(x=x, y=y,  group=.data[[catName]], fill=.data$fillC))
+                 curPlot <- curPlot + geom_polygon(data=curCumulativeTable, colour="black",  alpha=0.4, show.legend=FALSE,mapping=aes(x=.data$x, y=.data$y,  group=.data[[catName]], fill=.data$fillC))
             }
             else
-                curPlot <- curPlot + geom_polygon(data=curCumulativeTable, colour="black",  fill="white", alpha=0.4, mapping=aes(x=x, y=y,  group=.data[[catName]]))
+                curPlot <- curPlot + geom_polygon(data=curCumulativeTable, colour="black",  fill="white", alpha=0.4, mapping=aes(x=.data$x, y=.data$y,  group=.data[[catName]]))
           }
           else {
-               curPlot <- curPlot + geom_segment(aes(x = tsx, y = tsy, xend = tex, yend = tey), data = curCumulativeTable)
+               curPlot <- curPlot + geom_segment(aes(x = .data$tsx, y = .data$tsy, xend = .data$tex, yend = .data$tey), data = curCumulativeTable)
           }
         } # end of checking the list of categorical
    }
@@ -488,23 +493,6 @@ getCleanProjectionMatrix <- function(projectionMatrix, colorVar, odata, data){
   rownames( projMatrix) <- colnames(odata)
   colnames( projMatrix) <- c("x","y")
   invisible(projMatrix)
-}
-
-
-########################################################################################
-##  CURRENTLY UNUSED
-
-updateCategoricalValueGG <- function(projectionMatrix, catName, curCumulativeTable ){
-  # UNUSED
-  # Update the location of a categorical value, currently it would take too much time on hover to be applied
-  cumulativeName <- paste0(catName,".Cumulative")
-  cumulativeFreq <- paste0(catName,".freq")
-  xDir <-  projectionMatrix[catName, "V1"]
-  yDir <-  projectionMatrix[catName, "V2"]
-  curCumulativeTable  <- curCumulativeTable %>% mutate(bcx= (.data[[cumulativeName]] - .data[[cumulativeFreq]]*0.5)*xDir  ) %>% mutate(bcy= (.data[[cumulativeName]] - .data[[cumulativeFreq]]*0.5)*yDir  )
-  element <- geom_label( data=curCumulativeTable,  aes(bcx, bcy,label=.data[[catName]]))
-  invisible(element)
-
 }
 
 

@@ -36,7 +36,10 @@ A list with the projection matrix, coordinates of the projected samples and a lo
 Creates a RShiny Gadget for Star Coordinates
 }
 \examples{
-library(datasets)
-data(iris)
-# StarCoordinates(iris, "Species")
+if (interactive()) {
+ library(RadialVisGadgets)
+ library(datasets)
+ data(iris)
+ StarCoordinates(iris, "Species")
+}
 }
