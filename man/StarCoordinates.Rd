@@ -35,6 +35,28 @@ A list with the projection matrix, coordinates of the projected samples and a lo
 \description{
 Creates a RShiny Gadget for Star Coordinates
 }
+\details{
+Star Coordinate's (SC) goal is to generate a configuration which reveals the underlying nature of the data for cluster analysis, 
+outlier detection, and exploratory data analysis, e.g., by investigating the effect of specific dimensions on the separation of the data.  
+Traditional SC are defined for multidimensional numerical data sets \eqn{X=\{\mathbf{p}_1,\ldots, \mathbf{p}_N\},} 
+for N data points \eqn{\mathbf{x}_i \in \mathbf{R}^{d}} of dimensionality d. Let \eqn{A =\{ \mathbf{a}_{1}, \dots, \mathbf{a}_{d}  \} ,} be a set of (typically 2D) vectors, each corresponding to one of the d dimensions.
+The projection \eqn{ \mathbf{p}_i' \in \mathbf{R}^{2},} of a multidimensional point \eqn{ \mathbf{p}_i = (p_{i1},\ldots,p_{id}) \in \mathbf{R}^{d}, }in SC is then defined as:
+\deqn{ \mathbf{x}_i' = \sum_{j=1}^{d} \mathbf{a}_{j} g_j( \mathbf{p}_i),} with
+\deqn{ g_j(\mathbf{p}_i) = \frac{p_{ij} - min_j}{max_j - min_j} ,} and \eqn{(min_j,max_j),}denoting the value range of dimension j. 
+
+In the case of categorical dimensions, the values when numericRepresentation= TRUE are mapped into numerical type i.e. as.numeric()
+However equally spaced categorical points may not reflect the true nature of the data.  Instead, a frequency-based 
+representation may be applied for individual data points. 
+Assuming a categorical dimension j, we calculate the frequency \eqn{f_{jk},} of each category k of dimension j. 
+The respective axis vector  \eqn{\mathbf{a}_{j},}  is then divided into according blocks, whose size represent the relative frequency (or probability) 
+\eqn{\frac{f_{jk}}{\sum_{l=1}^m f_{jl}},} of each of the m categories of dimension j.
+
+In summary, given an order for each categorical dimension, the Equation \eqn{g(),} above can be extended  to SC for mixed data by:
+\deqn{ g_j(\mathbf{x}_i) = F_j(x_{ij}) - \frac{P_j(x_{ij})}{2}   , } if categorical/ordinal
+\deqn{ g_j(\mathbf{x}_i) = \frac{x_{ij} - min_j}{max_j - min_j}  ,} if numerical
+
+where \eqn{F_j,} is the cumulative density function for (categorical/ordinal) dimension j and \eqn{P_j,} its probability function.
+}
 \examples{
 if (interactive()) {
  library(RadialVisGadgets)

@@ -1,6 +1,9 @@
 ## Star Coordinates
 
-The following package creates a RShiny Gadget for Star Coordinates Plot. 
+The following package creates a RShiny Gadget for Star Coordinates Plot. The
+original Star Coordinates as proposed by Kandogan [1] along with optional axis calibration [3]. As the original approach is based on solely numerical attributes, an extension to hybrid representation can be applied [4]. 
+
+Other extensions for the approach are implemented. Hints [4]  and Orthographic Star Coordinates [2].
 
 
 ## Installation
@@ -22,11 +25,11 @@ This package is free and open source software, licensed under ![MIT licence](htt
 ## References 
 
 
-* Kandogan, E. (2001, August). Visualizing multi-dimensional clusters, trends, and outliers using star coordinates. In Proceedings of the seventh ACM SIGKDD international conference on Knowledge discovery and data mining (pp. 107-116).
+1. Kandogan, E. (2001, August). Visualizing multi-dimensional clusters, trends, and outliers using star coordinates. In Proceedings of the seventh ACM SIGKDD international conference on Knowledge discovery and data mining (pp. 107-116).
 
-* Lehmann, D. J., & Theisel, H. (2013). Orthographic star coordinates. IEEE Transactions on Visualization and Computer Graphics, 19(12), 2615-2624.
+2. Lehmann, D. J., & Theisel, H. (2013). Orthographic star coordinates. IEEE Transactions on Visualization and Computer Graphics, 19(12), 2615-2624.
 
-* Rubio-Sánchez, M., & Sanchez, A. (2014). Axis calibration for improving data attribute estimation in star coordinates plots. IEEE transactions on visualization and computer graphics, 20(12), 2013-2022
+3. Rubio-Sánchez, M., & Sanchez, A. (2014). Axis calibration for improving data attribute estimation in star coordinates plots. IEEE transactions on visualization and computer graphics, 20(12), 2013-2022
 
-* Matute, J., & Linsen, L. (2020). Hinted Star Coordinates for Mixed Data. In Computer Graphics Forum (Vol. 39, No. 1, pp. 117-133).
+4. Matute, J., & Linsen, L. (2020). Hinted Star Coordinates for Mixed Data. In Computer Graphics Forum (Vol. 39, No. 1, pp. 117-133).
 

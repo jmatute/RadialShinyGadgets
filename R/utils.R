@@ -1,47 +1,11 @@
-#' @import import
-
-#' @import tidyr
-library(tidyr)
-
-#' @import dplyr
-library(dplyr)
-
-#' @import miniUI
-library(miniUI)
-
-#' @import shiny
-library(shiny)
-
-
-#' @import ggplot2
-library(ggplot2)
-
-#' @importFrom shinyjs onevent useShinyjs
-import::from(shinyjs, onevent, useShinyjs)
-
-#' @import caret
-library(caret)
-
-#' @importFrom stats complete.cases
-import::from(stats,complete.cases)
-
-#' @import  rlang
-library(rlang)
-
-#' @import shinyscreenshot
-library(shinyscreenshot)
-
-#######################################################################
-#  Pre-processing functions
-
 
 #' Create Complete Case
 #' 
-#' How to handle missing data and zero variance attributes is undefined.
-#' As such, they are removed from the dataset and a warning is given to the user
+#' How to handle missing data and zero variance attributes is undefined. As such, they are removed from the dataset and a warning is given to the user
+#' @name  removeNonZeroAndMissing
 #' @param data dataframe to check its state
-#' @internal
 #' @return A cleaned dataset from missing data and zero-variance attributes
+#' @noRd
 removeNonZeroAndMissing <- function(data){
   # The approach assumes a complete case scenario
   # Remove any incomplete cases.
@@ -64,10 +28,10 @@ removeNonZeroAndMissing <- function(data){
 #'
 #' Initialize the projection matrix by dividing the unit circle
 #' into locations, the size and shape of each point is defined.
-#' @param data  
+#' @param data data to create the original projection atrmix from 
 #' @param initProjMatrix optional initial projection matrix 
-#' @internal
-#' @return 
+#' @return initial projection matrix
+#' @noRd
 initProjectionMatrix <- function(data, initProjMatrix = NULL) {
   # Interaction can change the properties of the points
   ncols <- dim(data)[2]
@@ -95,10 +59,10 @@ initProjectionMatrix <- function(data, initProjMatrix = NULL) {
 #' @param data  A dataframe with the data to explore. It should contain only numeric or factor columns.
 #' @param colorVar column where labels from the data are extracted.
 #' @param approach Standard approach as defined by Kandogan, or Orthographic Star Coordinates (OSC) with a recondition as defined by Lehmann and Thiesel
-#' @param projMatrix a pre-defined projection matrix as an initial configuration. Should be defined in the same fashion as the output
+#' @param projectionMatrix a pre-defined projection matrix as an initial configuration. Should be defined in the same fashion as the output
 #' @param clusterFunc function to define hints, assume increase in value of the function is an increase in quality of the projection. The function will be called with two parameters (points, labels)
-#' @internal
 #' @return list of found errors, NULL if no error was found.
+#' @noRd
 inputValidation <- function(data, colorVar , approach, projectionMatrix, clusterFunc){
   # Simple input validation for the function. Properties needed are described below
   error <- NULL
@@ -148,11 +112,11 @@ inputValidation <- function(data, colorVar , approach, projectionMatrix, cluster
 #' Circle Points
 #' 
 #' Create the points for the background 
-#' @param center
-#' @param radius
-#' @param npoints 
-#' @internal
-#' @return 
+#' @param center center of circle
+#' @param radius radius of the background circle
+#' @param npoints number of points to be created to define the circle
+#' @return points that define the background circle 
+#' @noRd
 circleFun <- function(center = c(0,0), radius = 1, npoints = 100){
   # A simple generator of the coordinates for a circle that appears as 
   # background
@@ -169,8 +133,8 @@ circleFun <- function(center = c(0,0), radius = 1, npoints = 100){
 #' A helper function for checking per categorical block whether the click 
 #' was performed inside or out the block
 #' @param row a row from categorical value list (internal)
-#' @internal
 #' @return Boolean w.r.t. point exists within a categorical block
+#' @noRd
 isPointInside <- function(row){
   # Test whether the point is inside a categorical block
   # 0.03 is the width.
@@ -192,8 +156,8 @@ isPointInside <- function(row){
 #' Creation of the Hints as  ggplot2 segments per action (subsets)
 #' @param projectionMatrix the current running projection matrix
 #' @param possibleActions the hint increase value of the possible action subset
-#' @internal
 #' @return ggplot2 segments with different widths based on the increase in quality
+#' @noRd
 getGGHints <- function(projectionMatrix, possibleActions){
   # Creation of the Hints as  ggplot2 segments
   # per action, 2 points with xy coordinates are created
@@ -221,8 +185,8 @@ getGGHints <- function(projectionMatrix, possibleActions){
 #' @param catName the name of the explored categorical dimension
 #' @param cumulativeList a list with the cumulative values,to avoid  unnecessary computation
 #' @param isInside for the category catName a logical vector whether is inside for each categorical value
-#' @internal
 #' @return geom_label is the element is inside a categorical value block
+#' @noRd
 insideCategoricalValueGG  <- function(projectionMatrix, catName, cumulativeList, isInside){
 
   dirVector <- projectionMatrix[catName,]
@@ -232,16 +196,25 @@ insideCategoricalValueGG  <- function(projectionMatrix, catName, cumulativeList,
     curCumulativeTable <- curCumulativeTable[isInside,]
     cumulativeName <- paste0(catName,".Cumulative")
     cumulativeFreq <- paste0(catName,".freq")
-    curCumulativeTable  <- curCumulativeTable %>% mutate(bcx= (.data[[cumulativeName]] - .data[[cumulativeFreq]]*0.5) * dirVector$V1 )
-                                              %>% mutate(bcy= (.data[[cumulativeName]] - .data[[cumulativeFreq]]*0.5) * dirVector$V2 )
+    curCumulativeTable  <- curCumulativeTable %>% mutate(bcx= (.data[[cumulativeName]] - .data[[cumulativeFreq]]*0.5) * dirVector$V1 ) %>%
+                                                  mutate(bcy= (.data[[cumulativeName]] - .data[[cumulativeFreq]]*0.5) * dirVector$V2 )
     element <- geom_label( data=curCumulativeTable,  aes(.data$bcx, .data$bcy,label=.data[[catName]]))
   }
   invisible(element)
 }
 
+#' Closest Dimension to click
+#' 
+#' Given mouse coordinates, find the closest dimension vector
+#' and return if it is under a certain distance
+#' @param projectionMatrix current projection matrix
+#' @param curX coordinate x of the current location in the plot
+#' @param curY coordinate y of the current location in the plot
+#' @param threshold distance threshold to be defined as close enough to a dimension
+#' @return return index of the closest dimension, -1 if distance is over a threshold
+#' @noRd
 closestDimension <- function(projectionMatrix, curX, curY,threshold=0.05){
-  # Given mouse coordinates, find the closest dimension vector
-  # and return if it is under a certain distance
+
   distances <- apply(projectionMatrix, 1, function(x)  sqrt((x[1]-curX)*(x[1]-curX) + (x[2]-curY)*(x[2]-curY)))
   closest <- which.min(distances)
   if ( distances[closest] < threshold){
@@ -251,8 +224,18 @@ closestDimension <- function(projectionMatrix, curX, curY,threshold=0.05){
   invisible(closestDim)
 }
 
+
+#' get the ggplot2 points 
+#' 
+#' Compute the projected points and create the geom_point based on the colouring attribute
+#' @param projectionMatrix current projection matrix in order to project the data
+#' @param rangedData scaled and mapped data
+#' @param oData original data, provides a way to color according to the original values
+#' @param colorVar which attribute to be used to color the variables in the dataset
+#' @return geom_point of the projected points
+#' @noRd
 getGGProjectedPoints <- function(projectionMatrix, rangedData, oData,  colorVar=NULL ){
-  # Given the projected points, draw them
+  
   projectedPoints <- getProjectedPoints(projectionMatrix, rangedData)
   drawnPoints <- NULL
   if (!is.null(colorVar) && !(colorVar %in% colnames(oData))){
@@ -273,8 +256,18 @@ getGGProjectedPoints <- function(projectionMatrix, rangedData, oData,  colorVar=
 #  Processing Functions
 
 
+#' Get Value of Clustering Function to Optimize
+#' 
+#' Given a clustering validation function return the value when applied to the projected points
+#' @param projectionMatrix current projection matrix in order to project the data
+#' @param rangedData scaled and mapped data
+#' @param oData original data, provides a way to color according to the original values
+#' @param colorVar which attribute to be used to color the variables in the dataset
+#' @param clusterFunc function to define hints, assume increase in value of the function is an increase in quality of the projection.
+#'                   The function will be called with two parameters (points, labels)
+#' @return value given the cluster validity function 
+#' @noRd
 getValueAtFunc <- function(projectionMatrix, rangedData, oData, colorVar , clusterFunc){
-  # Given a clustering validation function return the value when appliyed to the projected points
   projectedPoints <- getProjectedPoints(projectionMatrix, rangedData )
   labels <- as.numeric(oData[[colorVar]])
   value <- clusterFunc(projectedPoints, labels)
@@ -282,10 +275,21 @@ getValueAtFunc <- function(projectionMatrix, rangedData, oData, colorVar , clust
 }
 
 
+#' Get Value of Clustering Function to all actions
+#' 
+#' According to Hinted Star Coordinates Paper the hints can be computed with 20% change in angle or size
+#' Per dimension, define where the new vector should end based on the four actions: increase(inc), decrease(dec)
+#' clockwise rotation (cw) and counter-clockwise rotation(ccw). The total hints to be evaluated are then 4xdimensions
+#' @param projectionMatrix current projection matrix in order to project the data
+#' @param rangedData scaled and mapped data
+#' @param oData original data, provides a way to color according to the original values
+#' @param colorVar which attribute to be used to color the variables in the dataset
+#' @param clusterFunc function to define hints, assume increase in value of the function is an increase in quality of the projection.
+#'                   The function will be called with two parameters (points, labels)
+#' @return a dataframe containing the change in value due to the execution of the defined actions 
+#' @noRd
 getActionHints <- function(projectionMatrix, rangedData, oData, colorVar , clusterFunc){
-  # According to Hinted Star Coordinates Paper the hints can be computed with 20% change in angle or size
-  # Per dimension, define where the new vector should end based on the four actions: increase(inc), decrease(dec)
-  # clockwise rotation (cw) and counter-clockwise rotation(ccw). The total hints to be evaluated are then 4x#dimensions
+  
   increase <- function(x){x*1.20}
   decrease <- function(x){x*0.80}
   clockwise <- function(x){ x  - 0.20*3.14159*0.5 }
@@ -326,6 +330,17 @@ getActionHints <- function(projectionMatrix, rangedData, oData, colorVar , clust
 }
 
 
+#' Check whether is inside categorical value 
+#' 
+#' Check whether the point selected is inside a categorical value, works together with
+#' insideCategoricalValueGG to create the label of the selected categorical value
+#' @param projectionMatrix the current projection matrix
+#' @param catName the name of the explored categorical dimension
+#' @param cumulativeList a list with the cumulative values,to avoid  unnecessary computation
+#' @param px mouse click location on x coordinates
+#' @param  py mouse click location on y coordinates
+#' @return logical vector whether the clicked element is inside a categorical value block
+#' @noRd
 insideCategoricalValueList <- function(projectionMatrix, catName, cumulativeList, px, py ){
   # Given a factor attribute that is drawn. Check whether the interaction
   # points to a specific categorical value block
@@ -346,6 +361,15 @@ insideCategoricalValueList <- function(projectionMatrix, catName, cumulativeList
   invisible(isInside)
 }
 
+
+#' Swap elements in a vector
+#' 
+#' Swap two elements in a vector
+#' @param vector where the elements exist
+#' @param elem1 first element to swap
+#' @param elem2 second element to swap
+#' @return vector with swapped elements 
+#' @noRd
 swap <- function(vector,  elem1, elem2){
   # Simple swap of two elements in a vector
   p1 <- match(elem1, vector)
@@ -355,7 +379,14 @@ swap <- function(vector,  elem1, elem2){
   invisible(vector)
 }
 
-
+#' Insert a row into an existing dataframe
+#' 
+#' Insert a row into an existing dataframe
+#' @param existingDF existing dataframe to insert row to
+#' @param newrow row to be inserted
+#' @param r index to insert the new row
+#' @return dataframe with the new row at index
+#' @noRd
 insertRow <- function(existingDF, newrow, r) {
   # Insert a row in a existing data frame
   existingDF[seq(r+1,nrow(existingDF)+1),] <- existingDF[seq(r,nrow(existingDF)),]
@@ -363,9 +394,14 @@ insertRow <- function(existingDF, newrow, r) {
   existingDF
 }
 
-
+#' Orthographic Star Coordinates Recondition
+#' 
+#' Reconditioning based on the Orthographic Star Coordinates
+#' Maintains the orthogonality of the projection.
+#' @param projectionMatrix current projection matrix
+#' @return new projection matrix where the orthogonality is maintained
+#' @noRd
 OSCRecondition <- function(projectionMatrix){
-  # Reconditioning based on the Orthographic Star Coordinates
   normX <- norm(projectionMatrix$V1, type="2")
   dotP  <- sum((projectionMatrix$V1/normX)*projectionMatrix$V2)
   newY  <- projectionMatrix$V2 - dotP* (projectionMatrix$V1/normX)
@@ -374,8 +410,15 @@ OSCRecondition <- function(projectionMatrix){
   invisible(projectionMatrix)
 }
 
+#' get projected points
+#' 
+#' Project points given the projection matrix, simply matrix multiplication
+#' @param projectionMatrix projection matrix to multiply with the ranged data
+#' @param rangedData scaled and mapped data
+#' @return the coordinates of the projected points 
+#' @noRd
 getProjectedPoints <- function(projectionMatrix, rangedData){
-  # Project points given the projection matrix, simply matrix multiplication
+  # 
   A <- t(as.matrix(projectionMatrix[,1:2]))
   projectedPoints <- as.data.frame(t(A %*% rangedData))
   invisible(projectedPoints)
@@ -384,12 +427,28 @@ getProjectedPoints <- function(projectionMatrix, rangedData){
 
 #############################################################
 # Helper functions for frequency related analysis i.e. numeric representation = FALSE
+
+#' Create a frequency table
+#' 
+#' Given a category define the frequency i.e. % of occurences
+#' @param df dataframe as basis
+#' @param varName factor dimension to create the frequency
+#' @return frequency table of a categorical dimension
+#' @noRd
 getFrequencyTable <- function(df, varName){
   freqName <- paste0(varName,".freq")
   freqTable <- df %>% group_by(.data[[varName]]) %>% tally()  %>% mutate(!!freqName := n / sum(n)) %>% select(c(varName,freqName))
   invisible(freqTable)
 }
 
+#' Create a cumulative table
+#' 
+#' Given a frequency table create the cumulative function return a list
+#' with the order used for the cumulative function and the cumulative table result
+#' @param frequencyTable result from getFrequencyTable 
+#' @param order order of the categorical value to be summed over 
+#' @return list with the table and order of the cumulative results
+#' @noRd
 getCumulativeTable <- function(frequencyTable, order=NULL){
   if (!is.null(order)){
     indices <- match(order, frequencyTable[[colnames(frequencyTable)[1] ]])
@@ -406,6 +465,12 @@ getCumulativeTable <- function(frequencyTable, order=NULL){
   invisible(tableWithOrder)
 }
 
+#' Get Frequency List
+#' 
+#' Per factor dimension create a frequency table and return as list
+#' @param data dataset to check for factor attributes 
+#' @return list of frequencies for all categories
+#' @noRd
 getFrequencyList <- function(data){
   l = list()
   for( name in colnames(data)){
@@ -416,8 +481,17 @@ getFrequencyList <- function(data){
   invisible(l)
 }
 
-
-
+#' Draw Dimension Vectors
+#' 
+#' Draw the background and vectors to interact in the Star Coordinates approach.
+#' Modify the vectors according to different interaction
+#' @param projectionMatrix current projection matrix
+#' @param highlightedIdx if mouse is over a dimension vector, highlight the dimension vector
+#' @param highlightedCat a highlighted category displays the frequency blocks and allows interaction between blocks
+#' @param highlightedCatValue which element within a categorical dimension has been selected
+#' @param cumulativeList cumulative table for all categorical dimensions
+#' @return ggplot with the dimension vectors, background and possible interactions with dimensional vectors 
+#' @noRd
 drawDimensionVectors <- function(projectionMatrix, highlightedIdx, highlightedCat, highlightedCatValue,  cumulativeList){
    # Create the dimensional vectors and any visual modifications to the interaction area
    sizes <- projectionMatrix$szs
@@ -486,7 +560,17 @@ drawDimensionVectors <- function(projectionMatrix, highlightedIdx, highlightedCa
    invisible( curPlot + theme_void())
 }
 
-
+#' Get Ranged Data
+#' 
+#' In order to multiply by the projection matrix the values should be scaled
+#' if categorical, they should have a numerical value to be used.
+#' @param data original dataset to scale the values
+#' @param numericRepresentation assume that all attributes are numerical
+#' @param meanCentered application of axis calibration for  value estimation 
+#' @param frequencyList result from getFrequencyList (not used if numerical representation)
+#' @param cumulativeList result from calling getCumulativeTable per category (not used if numerical representation)
+#' @return a dataframe of the scaled and mapped dataset
+#' @noRd
 getRangedData <- function(data, numericRepresentation=TRUE, meanCentered = TRUE, frequencyList = NULL, cumulativeList =NULL){
   # Modify the original data so it can be used for matrix multiplication
 
@@ -522,7 +606,7 @@ getRangedData <- function(data, numericRepresentation=TRUE, meanCentered = TRUE,
                  for( catName in catVars){
                        cumulativeTable <- cumulativeList[[catName]]
                        data <- left_join(data, cumulativeTable$table)
-                       data[[catName]] <- data[[paste0(catName,".Cumulative")]]
+                       data[[catName]] <- data[[paste0(catName,".Cumulative")]] - 0.5*data[[paste0(catName,".freq")]] 
                        data[[paste0(catName,".Cumulative")]] <- NULL
                        data[[paste0(catName,".freq")]] <- NULL
                  }
@@ -536,10 +620,20 @@ getRangedData <- function(data, numericRepresentation=TRUE, meanCentered = TRUE,
 #####################################################################
 #   Output Functions
 
+
+#' Get Clean Projection Matrix
+#' 
+#' Get the projection matrix as a result without the sizes and shapes of points
+#' If a color Variable was selected then insert into the projection matrix at the
+#' same location where it should have been based on the dimensions
+#' @param projectionMatrix projection matrix to clean
+#' @param colorVar attribute used for colouring
+#' @param odata original dataset without any modifications
+#' @param data data post-preprocessing 
+#' @return cleaned projection matrix 
+#' @noRd
 getCleanProjectionMatrix <- function(projectionMatrix, colorVar, odata, data){
-  # Get the projection matrix as a result without the sizes and shapes of points
-  # If a color Variable was selected then insert into the projection matrix at the
-  # same location where it should've been based on the dimensions
+
   projMatrix  <- projectionMatrix[,1:2]
   if ( !is.null(colorVar)  && (colorVar %in% colnames(odata))){
     originalIdx <- which( colnames(odata) == colorVar)
