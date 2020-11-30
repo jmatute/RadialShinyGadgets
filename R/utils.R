@@ -1,5 +1,4 @@
 #' @import import
-library(import)
 
 #' @import tidyr
 library(tidyr)
@@ -29,10 +28,20 @@ import::from(stats,complete.cases)
 #' @import  rlang
 library(rlang)
 
+#' @import shinyscreenshot
+library(shinyscreenshot)
 
 #######################################################################
 #  Pre-processing functions
 
+
+#' Create Complete Case
+#' 
+#' How to handle missing data and zero variance attributes is undefined.
+#' As such, they are removed from the dataset and a warning is given to the user
+#' @param data dataframe to check its state
+#' @internal
+#' @return A cleaned dataset from missing data and zero-variance attributes
 removeNonZeroAndMissing <- function(data){
   # The approach assumes a complete case scenario
   # Remove any incomplete cases.
@@ -51,9 +60,15 @@ removeNonZeroAndMissing <- function(data){
   invisible(data)
 }
 
+#' Initialize Projection Matrix
+#'
+#' Initialize the projection matrix by dividing the unit circle
+#' into locations, the size and shape of each point is defined.
+#' @param data  
+#' @param initProjMatrix optional initial projection matrix 
+#' @internal
+#' @return 
 initProjectionMatrix <- function(data, initProjMatrix = NULL) {
-  # Initialize the projection matrix by dividing the unit circle
-  # into locations, the size and shape of each point is defined.
   # Interaction can change the properties of the points
   ncols <- dim(data)[2]
   initMatrix <- matrix(0L, nrow = 2, ncol = ncols)
@@ -73,6 +88,17 @@ initProjectionMatrix <- function(data, initProjMatrix = NULL) {
   invisible(initMatrix)
 }
 
+
+#' Input Validation
+#'
+#' Check if the input is valid
+#' @param data  A dataframe with the data to explore. It should contain only numeric or factor columns.
+#' @param colorVar column where labels from the data are extracted.
+#' @param approach Standard approach as defined by Kandogan, or Orthographic Star Coordinates (OSC) with a recondition as defined by Lehmann and Thiesel
+#' @param projMatrix a pre-defined projection matrix as an initial configuration. Should be defined in the same fashion as the output
+#' @param clusterFunc function to define hints, assume increase in value of the function is an increase in quality of the projection. The function will be called with two parameters (points, labels)
+#' @internal
+#' @return list of found errors, NULL if no error was found.
 inputValidation <- function(data, colorVar , approach, projectionMatrix, clusterFunc){
   # Simple input validation for the function. Properties needed are described below
   error <- NULL
@@ -118,8 +144,18 @@ inputValidation <- function(data, colorVar , approach, projectionMatrix, cluster
 ######################################################################
 #  Helper functions for drawing and interaction related functions
 
+
+#' Circle Points
+#' 
+#' Create the points for the background 
+#' @param center
+#' @param radius
+#' @param npoints 
+#' @internal
+#' @return 
 circleFun <- function(center = c(0,0), radius = 1, npoints = 100){
-  # A simple generator of the coordinates for a circle that appears as background
+  # A simple generator of the coordinates for a circle that appears as 
+  # background
   r = radius
   tt <- seq(0,2*pi,length.out = npoints)
   xx <- center[1] + r * cos(tt)
@@ -127,6 +163,14 @@ circleFun <- function(center = c(0,0), radius = 1, npoints = 100){
   return(data.frame(x = xx, y = yy))
 }
 
+
+#' Is Point inside a categorical block
+#' 
+#' A helper function for checking per categorical block whether the click 
+#' was performed inside or out the block
+#' @param row a row from categorical value list (internal)
+#' @internal
+#' @return Boolean w.r.t. point exists within a categorical block
 isPointInside <- function(row){
   # Test whether the point is inside a categorical block
   # 0.03 is the width.
@@ -143,8 +187,13 @@ isPointInside <- function(row){
   invisible(d < 0.03 && val > 0 && val < recArea)
 }
 
-
-
+#' ggplot2 hints
+#' 
+#' Creation of the Hints as  ggplot2 segments per action (subsets)
+#' @param projectionMatrix the current running projection matrix
+#' @param possibleActions the hint increase value of the possible action subset
+#' @internal
+#' @return ggplot2 segments with different widths based on the increase in quality
 getGGHints <- function(projectionMatrix, possibleActions){
   # Creation of the Hints as  ggplot2 segments
   # per action, 2 points with xy coordinates are created
@@ -164,8 +213,18 @@ getGGHints <- function(projectionMatrix, possibleActions){
   invisible(segments)
 }
 
+
+#' ggplot2 label inside categorical value
+#' 
+#' Create the label for the factor value in the selected factor dimension
+#' @param projectionMatrix the current projection matrix
+#' @param catName the name of the explored categorical dimension
+#' @param cumulativeList a list with the cumulative values,to avoid  unnecessary computation
+#' @param isInside for the category catName a logical vector whether is inside for each categorical value
+#' @internal
+#' @return geom_label is the element is inside a categorical value block
 insideCategoricalValueGG  <- function(projectionMatrix, catName, cumulativeList, isInside){
-  # Create the label for the factor value in the selected factor dimension
+
   dirVector <- projectionMatrix[catName,]
   curCumulativeTable <- cumulativeList[[catName]]$table
   element <- NULL
@@ -173,7 +232,8 @@ insideCategoricalValueGG  <- function(projectionMatrix, catName, cumulativeList,
     curCumulativeTable <- curCumulativeTable[isInside,]
     cumulativeName <- paste0(catName,".Cumulative")
     cumulativeFreq <- paste0(catName,".freq")
-    curCumulativeTable  <- curCumulativeTable %>% mutate(bcx= (.data[[cumulativeName]] - .data[[cumulativeFreq]]*0.5) * dirVector$V1 ) %>% mutate(bcy= (.data[[cumulativeName]] - .data[[cumulativeFreq]]*0.5) * dirVector$V2 )
+    curCumulativeTable  <- curCumulativeTable %>% mutate(bcx= (.data[[cumulativeName]] - .data[[cumulativeFreq]]*0.5) * dirVector$V1 )
+                                              %>% mutate(bcy= (.data[[cumulativeName]] - .data[[cumulativeFreq]]*0.5) * dirVector$V2 )
     element <- geom_label( data=curCumulativeTable,  aes(.data$bcx, .data$bcy,label=.data[[catName]]))
   }
   invisible(element)
@@ -407,7 +467,7 @@ drawDimensionVectors <- function(projectionMatrix, highlightedIdx, highlightedCa
             curCumulativeTable  <- curCumulativeTable %>% mutate(bcx= (.data[[cumulativeName]] - .data[[cumulativeFreq]]) * dirVector$x ) %>% mutate(bcy= (.data[[cumulativeName]] - .data[[cumulativeFreq]]) * dirVector$y )
             curCumulativeTable  <- curCumulativeTable %>% mutate(bsx = .data$bcx  +  0.02 * ortho[1]) %>% mutate(bex = .data$bcx +  -0.02 * ortho[1])
             curCumulativeTable  <- curCumulativeTable %>% mutate(bsy = .data$bcy  +  0.02 * ortho[2]) %>% mutate(bey = .data$bcy +  -0.02 * ortho[2])
-            curCumulativeTable  <- curCumulativeTable %>%  tidyr::gather( .data$orig_x, x , c(.data$tsx, .data$tex, .data$bex, .data$bsx)) %>%  gather( .data$orig_y, y , c(.data$tsy, .data$tey, .data$bey, .data$bsy))  %>% 
+            curCumulativeTable  <- curCumulativeTable %>%  tidyr::gather( .data$orig_x, .data$x , c(.data$tsx, .data$tex, .data$bex, .data$bsx)) %>%  gather( .data$orig_y, .data$y , c(.data$tsy, .data$tey, .data$bey, .data$bsy))  %>% 
                                                            mutate( orig_x=substr(.data$orig_x,1,2)) %>% mutate( orig_y=substr(.data$orig_y,1,2)) %>% filter(.data$orig_x == .data$orig_y)
 
             if ( !is.null(highlightedCatValue)){

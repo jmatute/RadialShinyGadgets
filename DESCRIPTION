@@ -6,11 +6,9 @@ Author: José Matute
 Author@R: person("José", "Matute", email = "jmatuteflores@gmail.com", 
   role = c("aut", "cre"))
 URL: https://github.com/jmatute/StarCoordinates-RShinyGadget
-Imports: import, ggplot2, tidyr, dplyr, miniUI, shiny, shinyjs, caret, rlang
+Imports: import, ggplot2, tidyr, dplyr, miniUI, shiny, shinyjs, caret, rlang, shinyscreenshot
 Maintainer: José Matute <jmatuteflores@gmail.com>
-Description: A package containing common interactive gadgets using Star  visualization.
-    Star Coordinates as proposed by Kandogan or Orthographic Cordinates..
-    Data transformations: Standard, Mixed and/or centering.  
+Description: A package containing interactive gadgets of the Star Coordinates Plot and variances thereof.
 License: MIT + file LICENCE 
 Encoding: UTF-8
 LazyData: true

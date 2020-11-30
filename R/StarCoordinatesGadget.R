@@ -20,7 +20,7 @@ source("./R/utils.R")
 #'  data(iris)
 #'  StarCoordinates(iris, "Species")
 #' }
-
+#' 
 StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRepresentation=TRUE, meanCentered = TRUE, projMatrix=NULL, clusterFunc = NULL) {
 
   #######################################################################
@@ -59,6 +59,7 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
     miniButtonBlock(
       actionButton("zoomIn","", icon = icon("search-plus")),
       actionButton("zoomOut","", icon = icon("search-minus")),
+      actionButton("screenshot","", icon= icon("camera-retro")),
       if( !is.null(colorVar) && !is.null(clusterFunc))
              actionButton("hint","Hint", icon = icon("map-signs")),
     )
@@ -218,7 +219,7 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
 
       observeEvent(input$zoomIn,{ helperValues$plotLimit <-  helperValues$plotLimit*0.9 })
       observeEvent(input$zoomOut,{ helperValues$plotLimit <-  helperValues$plotLimit*1.1 })
-
+      observeEvent(input$screenshot,{  screenshot() } )
       observeEvent(input$done, {
         projMatrix <- getCleanProjectionMatrix(helperValues$projectionMatrix, colorVar, odata, df)
         projectedPoints <- getProjectedPoints(helperValues$projectionMatrix, helperValues$rangedData )
