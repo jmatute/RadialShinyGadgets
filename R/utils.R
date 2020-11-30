@@ -541,7 +541,7 @@ drawDimensionVectors <- function(projectionMatrix, highlightedIdx, highlightedCa
             curCumulativeTable  <- curCumulativeTable %>% mutate(bcx= (.data[[cumulativeName]] - .data[[cumulativeFreq]]) * dirVector$x ) %>% mutate(bcy= (.data[[cumulativeName]] - .data[[cumulativeFreq]]) * dirVector$y )
             curCumulativeTable  <- curCumulativeTable %>% mutate(bsx = .data$bcx  +  0.02 * ortho[1]) %>% mutate(bex = .data$bcx +  -0.02 * ortho[1])
             curCumulativeTable  <- curCumulativeTable %>% mutate(bsy = .data$bcy  +  0.02 * ortho[2]) %>% mutate(bey = .data$bcy +  -0.02 * ortho[2])
-            curCumulativeTable  <- curCumulativeTable %>%  tidyr::gather( .data$orig_x, .data$x , c(.data$tsx, .data$tex, .data$bex, .data$bsx)) %>%  gather( .data$orig_y, .data$y , c(.data$tsy, .data$tey, .data$bey, .data$bsy))  %>% 
+            curCumulativeTable  <- curCumulativeTable %>%  tidyr::gather( .data$orig_x, x , c(.data$tsx, .data$tex, .data$bex, .data$bsx)) %>%  gather( .data$orig_y, y , c(.data$tsy, .data$tey, .data$bey, .data$bsy))  %>% 
                                                            mutate( orig_x=substr(.data$orig_x,1,2)) %>% mutate( orig_y=substr(.data$orig_y,1,2)) %>% filter(.data$orig_x == .data$orig_y)
 
             if ( !is.null(highlightedCatValue)){
@@ -605,8 +605,8 @@ getRangedData <- function(data, numericRepresentation=TRUE, meanCentered = TRUE,
                  catVars <- names(frequencyList)
                  for( catName in catVars){
                        cumulativeTable <- cumulativeList[[catName]]
-                       data <- left_join(data, cumulativeTable$table)
-                       data[[catName]] <- data[[paste0(catName,".Cumulative")]] - 0.5*data[[paste0(catName,".freq")]] 
+                       data <- left_join(data, cumulativeTable$table, by=catName)
+                       data[[catName]] <- data[[paste0(catName,".Cumulative")]]  -  data[[paste0(catName,".freq")]]*0.5
                        data[[paste0(catName,".Cumulative")]] <- NULL
                        data[[paste0(catName,".freq")]] <- NULL
                  }
