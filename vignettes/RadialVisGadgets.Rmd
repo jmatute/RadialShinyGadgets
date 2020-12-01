@@ -2,11 +2,11 @@
 title: "Radial Vis Gadgets"
 author: "Jose Matute"
 date: "12/1/2020"
-output:
-  html_document:
-    df_print: paged
-vignette: |
-  %\VignetteIndexEntry{Radial Vis Gadgets} %\VignetteEngine{knitr::rmarkdown} \usepackage[utf8]{inputenc}
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Radial Vis Gadgets}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -37,20 +37,20 @@ One can observe four numerical attributes and one factor. The traditional Star C
 
 Following the traditional approach [2] the five attributes are placed at equal angle steps from each other. 
 
-![*Initial Configuration for Iris Dataset*](../imgs/iris_init.png)
+![*Initial Configuration for Iris Dataset*](./imgs/iris_init.png)
 
 
 You can move your move towards the endings of the dimensional vectors. The circle at the end will be highlighted.
 As you can see in the figure below.
 
 
-![*Movement of dimensional axes*](../imgs/iris_movement.png)
+![*Movement of dimensional axes*](./imgs/iris_movement.png)
 
 
 You can move these axes in order to create a configuration that you believe suitable and brush a selection of points.
 
 
-![*Brushing over points *](../imgs/iris_brush.png)
+![*Brushing over points *](./imgs/iris_brush.png)
 
 
 #### Buttons
@@ -76,7 +76,7 @@ Orthographic Star Coordinates are supported by the Star Coordinates by adding th
 StarCoordinates(iris, approach="OSC")
 ```
 
-![*Initial OSC Configuration for Iris Dataset*](../imgs/iris_osc.png)
+![*Initial OSC Configuration for Iris Dataset*](./imgs/iris_osc.png)
 
 #### Numeric Representation = FALSE
 
@@ -85,15 +85,15 @@ The axis for the factor dimensions are divided according to the frequency of eac
 Given that the 3 species labels are uniformly distributed, 2 ticks appear separating the 3 blocks for each categorical dimension.
 
 
-![*Initial Configuration for Iris Dataset with non-numerical representation *](../imgs/iris_init_false.png)
+![*Initial Configuration for Iris Dataset with non-numerical representation *](./imgs/iris_init_false.png)
 
 By clicking at the axis, you can activate it. The categorical value blocks are now visible on the selected factor.
 
-![*Selection of factor dimensions *](../imgs/iris_axes_selected.png)
+![*Selection of factor dimensions *](./imgs/iris_axes_selected.png)
 
 By double-clicking on a categorical block, the value the block represents is highlighted. If another categorical block is selected by double-clicking, then those two blocks will swap with each other. Allowing to shift categorical values in one dimension. You can disable a categorical selection by double clicking a second time in the same categorical block.
 
-![*Selection of categorical value within factor *](../imgs/iris_click.png)
+![*Selection of categorical value within factor *](./imgs/iris_click.png)
 
 #### Labels in analysis
 
@@ -104,7 +104,7 @@ StarCoordinates(iris, colorVar="Species")
 By sending a factor dimension name in colorVar, the analysis can be performed on labeled data.  
 The points are then coloured according to the selected dimension. The "Standard" and "OSC" approach are avaible for both analysis.
 
-![*Star Coordinates with labels*](../imgs/iris_class.png)
+![*Star Coordinates with labels*](./imgs/iris_class.png)
 
 #### Hints 
 
@@ -115,7 +115,7 @@ library(clValid)
 func <- function(points, labels){ dunn(Data=points, clusters=labels)}
 StarCoordinates(iris, colorVar="Species", clusterFunc = func) 
 ```
-![*Hints on Star Coordinates *](../imgs/iris_hints.png)
+![*Hints on Star Coordinates *](./imgs/iris_hints.png)
 
 
 ### Notes On Data Processing 
