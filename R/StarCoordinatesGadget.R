@@ -94,6 +94,7 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
       helperValues$movingDim <- -1
       helperValues$plotLimit <- 1.5
       helperValues$projectionMatrix <- initProjectionMatrix(df, projMatrix)
+    
       helperValues$lbl <- NULL
       helperValues$cumulativeList <-  NULL
       helperValues$rangedData <- NULL
@@ -194,6 +195,10 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
           }
           helperValues$rangedData <- getRangedData(df, numericRepresentation, meanCentered, frequencyList, helperValues$cumulativeList)
         }
+        
+        if (approach == "OSC"){
+          helperValues$projectionMatrix <- OSCRecondition(helperValues$projectionMatrix)
+        }
 
         if( numericRepresentation && is.null( helperValues$rangedData )){
              helperValues$rangedData <- getRangedData(df, numericRepresentation, meanCentered)
@@ -202,7 +207,7 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
 
 
       output$plot <- renderPlot({
-          initCumulative()
+          if (is.null( helperValues$rangedData )) initCumulative()
           curPlot <- drawDimensionVectors(helperValues$projectionMatrix, highlightedIdx(), highlightedCat(), highlightedCatValue(),  helperValues$cumulativeList )
           if (!is.null(helperValues$lbl))
                 curPlot <- curPlot + helperValues$lbl
@@ -211,7 +216,7 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
 
           curPlot + getGGProjectedPoints(helperValues$projectionMatrix, helperValues$rangedData , odata, colorVar) +
           coord_cartesian(xlim = c(-helperValues$plotLimit,helperValues$plotLimit ), ylim = c(-helperValues$plotLimit,helperValues$plotLimit ))
-      },res=64)
+      },res=96)
 
       observeEvent(input$cancel, {
         stopApp(NULL)
@@ -220,7 +225,7 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
 
 
       observeEvent(input$hint, {
-             actions <- getActionHints(helperValues$projectionMatrix, helperValues$rangedData, odata, colorVar , clusterFunc)
+             actions <- getActionHints(helperValues$projectionMatrix, helperValues$rangedData, odata, colorVar ,approach, clusterFunc)
 
              updateActionButton(session, "hint", label = paste0("Hint. Max(",formatC(max(actions$diff), format = "e",  digits = 2), ")"))
              if (max(actions$diff) > 0){
@@ -238,11 +243,11 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
 
       observeEvent(input$zoomIn,{ helperValues$plotLimit <-  helperValues$plotLimit*0.9 })
       observeEvent(input$zoomOut,{ helperValues$plotLimit <-  helperValues$plotLimit*1.1 })
-      observeEvent(input$screenshot, { screenshot()})
+      observeEvent(input$screenShot, { screenshot()})
       observeEvent(input$done, {
         projMatrix <- getCleanProjectionMatrix(helperValues$projectionMatrix, colorVar, odata, df)
         projectedPoints <- getProjectedPoints(helperValues$projectionMatrix, helperValues$rangedData )
-        selected <- brushedPoints(projectedPoints, input$plotBrush, allRows = TRUE )
+        selected <- brushedPoints(df=projectedPoints, brush=input$plotBrush, xvar="V1", yvar="V2", allRows = TRUE)
         result <- list(projMatrix, selected$selected_, projectedPoints)
         names(result) <- c("Proj.Matrix","Selection","Projected.Points")
 

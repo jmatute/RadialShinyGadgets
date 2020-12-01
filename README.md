@@ -16,8 +16,10 @@ You can install the stable version from the main branch:
 
 ## Usage 
 
-
-
+See the radial package vignettes for more details or go to ![my website](https://www.jmatute.de/RadVisGadget)
+    
+    library(RadialVisGadgets)
+    
 ## License
 
 This package is free and open source software, licensed under ![MIT licence](https://opensource.org/licenses/MIT)

@@ -284,11 +284,12 @@ getValueAtFunc <- function(projectionMatrix, rangedData, oData, colorVar , clust
 #' @param rangedData scaled and mapped data
 #' @param oData original data, provides a way to color according to the original values
 #' @param colorVar which attribute to be used to color the variables in the dataset
+#' @param approach approach used for star coordinates 
 #' @param clusterFunc function to define hints, assume increase in value of the function is an increase in quality of the projection.
 #'                   The function will be called with two parameters (points, labels)
 #' @return a dataframe containing the change in value due to the execution of the defined actions 
 #' @noRd
-getActionHints <- function(projectionMatrix, rangedData, oData, colorVar , clusterFunc){
+getActionHints <- function(projectionMatrix, rangedData, oData, colorVar , approach, clusterFunc){
   
   increase <- function(x){x*1.20}
   decrease <- function(x){x*0.80}
@@ -319,8 +320,13 @@ getActionHints <- function(projectionMatrix, rangedData, oData, colorVar , clust
     action <- possibleActions[rowIdx,]$action
     newProjection[vec,"V1"] <-  changesInPts[vec,paste0("V1_",action)]
     newProjection[vec,"V2"] <-  changesInPts[vec,paste0("V2_",action)]
+    
+    if ( approach == "OSC"){
+        newProjection <-  OSCRecondition(newProjection)
+    }
     possibleActions[rowIdx,]$x <-  changesInPts[vec,paste0("V1_",action)]
     possibleActions[rowIdx,]$y <-  changesInPts[vec,paste0("V2_",action)]
+    
     # Get the value with the new projection matrix
     possibleActions[rowIdx,]$val <- getValueAtFunc(newProjection, rangedData , oData, colorVar , clusterFunc)
   }
@@ -518,7 +524,6 @@ drawDimensionVectors <- function(projectionMatrix, highlightedIdx, highlightedCa
 
    curPlot <- ggplot() + pts+ labels +vectors+ backgroundCircle
    if( length(cumulativeList) > 0){
-
         catVars <- names(cumulativeList)
 
         for( catName in catVars){
@@ -538,11 +543,16 @@ drawDimensionVectors <- function(projectionMatrix, highlightedIdx, highlightedCa
           drawCat <- drawCat || (  highlightedCat != -1 && catName %in%  rownames(projectionMatrix)[highlightedCat] )
 
           if ( drawCat  ){
+
             curCumulativeTable  <- curCumulativeTable %>% mutate(bcx= (.data[[cumulativeName]] - .data[[cumulativeFreq]]) * dirVector$x ) %>% mutate(bcy= (.data[[cumulativeName]] - .data[[cumulativeFreq]]) * dirVector$y )
             curCumulativeTable  <- curCumulativeTable %>% mutate(bsx = .data$bcx  +  0.02 * ortho[1]) %>% mutate(bex = .data$bcx +  -0.02 * ortho[1])
             curCumulativeTable  <- curCumulativeTable %>% mutate(bsy = .data$bcy  +  0.02 * ortho[2]) %>% mutate(bey = .data$bcy +  -0.02 * ortho[2])
-            curCumulativeTable  <- curCumulativeTable %>%  tidyr::gather( .data$orig_x, x , c(.data$tsx, .data$tex, .data$bex, .data$bsx)) %>%  gather( .data$orig_y, y , c(.data$tsy, .data$tey, .data$bey, .data$bsy))  %>% 
+
+            curCumulativeTable  <- curCumulativeTable %>%  tidyr::gather( "orig_x", "x" , c(.data$tsx, .data$tex, .data$bex, .data$bsx)) %>%
+                                                                  gather( "orig_y", "y" , c(.data$tsy, .data$tey, .data$bey, .data$bsy)) %>% 
                                                            mutate( orig_x=substr(.data$orig_x,1,2)) %>% mutate( orig_y=substr(.data$orig_y,1,2)) %>% filter(.data$orig_x == .data$orig_y)
+
+            
 
             if ( !is.null(highlightedCatValue)){
                  curCumulativeTable <- curCumulativeTable %>% mutate(fillC = ifelse( .data[[catName]] == highlightedCatValue, "1", "0")  )
