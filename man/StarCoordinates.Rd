@@ -6,7 +6,7 @@
 \usage{
 StarCoordinates(
   df,
-  colorVar = NULL,
+  color = NULL,
   approach = "Standard",
   numericRepresentation = TRUE,
   meanCentered = TRUE,
@@ -17,7 +17,7 @@ StarCoordinates(
 \arguments{
 \item{df}{A dataframe with the data to explore. It should contain only numeric or factor columns.}
 
-\item{colorVar}{column where labels from the data are extracted.}
+\item{color}{column where labels from the data are extracted.}
 
 \item{approach}{Standard approach as defined by Kandogan, or Orthographic Star Coordinates (OSC) with a recondition as defined by Lehmann and Thiesel}
 

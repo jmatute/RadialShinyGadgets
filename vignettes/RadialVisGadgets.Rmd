@@ -17,8 +17,9 @@ library(knitr)
 
 The RadialVisGadgets package provides interactive Shiny gadgets for interactive radial visualizations. By interacting with the gadgets, Exploratory Data Analysis can be performed. The gadgets can be used at any time during the analysis. They allow the exploration of the underlying nature of the data in tasks related to cluster analysis, outlier detection, and exploratory data analysis, e.g., by investigating the effect of specific dimensions on the separation of the data.
 
+[Star Coordinates](#Star)
 
-### Star Coordinates 
+### Star Coordinates {#Star}
 
 Star Coordinate's (SC) goal is to generate a configuration of the dimensional vectors which reveals the underlying nature of the data. Let's look at the well known *Iris* dataset [1]. 
 

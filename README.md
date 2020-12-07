@@ -1,7 +1,12 @@
-## Star Coordinates
+## Radial Visualization Shiny Gadgets
 
-The following package creates a RShiny Gadget for Star Coordinates Plot. The
-original Star Coordinates as proposed by Kandogan [1] along with optional axis calibration [3]. As the original approach is based on solely numerical attributes, an extension to hybrid representation can be applied [4]. 
+
+The following package creates a RShiny Gadgets for Radial Visualizations.
+
+
+## Star Coordinates 
+
+The original Star Coordinates as proposed by Kandogan [1] along with optional axis calibration [3]. As the original approach is based on solely numerical attributes, an extension to hybrid representation can be applied [4]. 
 
 Other extensions for the approach are implemented. Hints [4]  and Orthographic Star Coordinates [2].
 
@@ -11,7 +16,7 @@ Other extensions for the approach are implemented. Hints [4]  and Orthographic S
 
 You can install the stable version from the main branch:
 
-    devtools::install_github(repo = "jmatute/StarCoordinates-RShinyGadget", ref="main")
+    devtools::install_github(repo = "jmatute/RadialShinyGadgets", ref="main")
 
 
 ## Usage 
@@ -33,5 +38,6 @@ This package is free and open source software, licensed under [MIT licence](http
 
 3. Rubio-Sánchez, M., & Sanchez, A. (2014). Axis calibration for improving data attribute estimation in star coordinates plots. IEEE transactions on visualization and computer graphics, 20(12), 2013-2022
 
-4. Matute, J., & Linsen, L. (2020). Hinted Star Coordinates for Mixed Data. In Computer Graphics Forum (Vol. 39, No. 1, pp. 117-133).
+4. Matute, J., & Linsen, L. (2020). Hinted Star Coordinates for Mixed Data. In Computer Graphics Forum (Vs for Radial Visualizations.
+
 

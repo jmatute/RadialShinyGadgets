@@ -23,7 +23,7 @@
 #' 
 #' where \eqn{F_j,} is the cumulative density function for (categorical/ordinal) dimension j and \eqn{P_j,} its probability function. 
 #' @param df  A dataframe with the data to explore. It should contain only numeric or factor columns.
-#' @param colorVar column where labels from the data are extracted.
+#' @param color column where labels from the data are extracted.
 #' @param approach Standard approach as defined by Kandogan, or Orthographic Star Coordinates (OSC) with a recondition as defined by Lehmann and Thiesel
 #' @param numericRepresentation if true attempt to convert all factors to numeric representation, otherwise used mixed representation as defined in Hinted Star Coordinates
 #' @param meanCentered center the projection at the mean of the values. May allow for easier value estimation
@@ -39,11 +39,13 @@
 #'  data(iris)
 #'  StarCoordinates(iris, "Species")
 #' }
-StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRepresentation=TRUE, meanCentered = TRUE, projMatrix=NULL, clusterFunc = NULL) {
+StarCoordinates <- function(df, color = NULL,  approach="Standard", numericRepresentation=TRUE, meanCentered = TRUE, projMatrix=NULL, clusterFunc = NULL) {
 
   #######################################################################
   # Simple Pre-processing, validate input to function and create data that
   # won't change throughout the running of the gadget
+  colorVar <- color #prefer nomenclature for the parameters as color, but semantically prefer colorVar
+  # check for simple errors and stop in case error if bad enough
   inputCheck <- inputValidation(df,  colorVar,  approach, projMatrix, clusterFunc )
   if (!is.null(inputCheck)){
       if (inputCheck$stop)  stop(inputCheck$errorMessage)
@@ -52,6 +54,7 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
   odata <- df # Store original data somewhere
   df <- removeNonZeroAndMissing(df)
 
+  # 
   frequencyList <- NULL
   if (!is.null(colorVar)  && (colorVar %in% colnames(df))){
       df[[colorVar]] <- NULL
@@ -59,7 +62,8 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
   else if (!is.null(colorVar)){
        colorVar <- NULL
   }
-
+  
+  # if it is a numerical representation, simply try to convert 
   if(numericRepresentation){
        df <-  mutate_if(df, is.factor, as.numeric)
   }
@@ -67,6 +71,7 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
        frequencyList <- getFrequencyList(df)
   }
   ######################################################################
+  # throttle given the type of interaction with the vectors 
   ui <- miniPage(
     useShinyjs(),
     gadgetTitleBar("Star Coordinates"),
@@ -85,7 +90,7 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
 
   #####################################################################
   server <- function(input, output, session) {
-      # Create Status variables
+      # Create Status variables, helper data inside the server 
       highlightedIdx <- reactiveVal(-1)
       highlightedCat <- reactiveVal(-1)
       highlightedCatValue <- reactiveVal(value = NULL)
@@ -106,10 +111,11 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
            helperValues$curY <- input$plot_hover$y
            currentClosest <- closestDimension(helperValues$projectionMatrix, helperValues$curX, helperValues$curY )
            if (helperValues$clicked ){
+                  # if we are moving the dimensional vectors, deactivate the brushing 
                   session$resetBrush("plotBrush")
 
                   helperValues$projectionMatrix[helperValues$movingDim,1:2] <- c(helperValues$curX, helperValues$curY)
-                  if (approach == "OSC"){
+                  if (approach == "OSC"){ # biggest difference is the recondition criterion when creating the star coordinates 
                        helperValues$projectionMatrix <- OSCRecondition(helperValues$projectionMatrix)
                   }
                   highlightedIdx(helperValues$movingDim)
@@ -127,7 +133,10 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
       observeEvent(input$plotDblClick,{
 
           if(!numericRepresentation){
+            # If categories are present in the representation, then we need to check 
+            # for swapping or highlighting the name. 
             if ( highlightedCat() != -1){
+              
                 nameDim <- colnames(df)[highlightedCat()]
                 inside <- insideCategoricalValueList(helperValues$projectionMatrix, nameDim, helperValues$cumulativeList, helperValues$curX, helperValues$curY )
                 helperValues$lbl <-  insideCategoricalValueGG(helperValues$projectionMatrix, nameDim, helperValues$cumulativeList, inside)
@@ -172,6 +181,8 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
       })
 
       mouseDown <- function(){
+         # detect where the mouse was pressed, shiny doesn't divide click in 3 parts, so we have to use the javascript 
+         # events 
          currentClosest <- closestDimension(helperValues$projectionMatrix, helperValues$curX, helperValues$curY )
          if ( currentClosest != -1){
                helperValues$movingDim <- currentClosest
@@ -184,8 +195,12 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
         helperValues$clicked <- FALSE
         helperValues$movingDim <- -1
       }
+      
 
       initCumulative <- function(){
+        # The placement of the points is dependent on the cumulative function in the case of categories
+        # it is faster to have smaller tables that transform the frequency tables to cumulative and simply
+        # change the cumulative sum afterwards
         if (!is.null( frequencyList) && is.null(helperValues$cumulativeList)){
           helperValues$cumulativeList <- list()
           catVars <- names(frequencyList)
@@ -200,6 +215,7 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
           helperValues$projectionMatrix <- OSCRecondition(helperValues$projectionMatrix)
         }
 
+        # if it's numerical, let re-range the values 
         if( numericRepresentation && is.null( helperValues$rangedData )){
              helperValues$rangedData <- getRangedData(df, numericRepresentation, meanCentered)
         }
@@ -207,13 +223,19 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
 
 
       output$plot <- renderPlot({
+          # if we don't have the data scaled, then do the first call
           if (is.null( helperValues$rangedData )) initCumulative()
-          curPlot <- drawDimensionVectors(helperValues$projectionMatrix, highlightedIdx(), highlightedCat(), highlightedCatValue(),  helperValues$cumulativeList )
-          if (!is.null(helperValues$lbl))
-                curPlot <- curPlot + helperValues$lbl
-          if (!is.null(helperValues$hints))
-                curPlot <- curPlot + helperValues$hints
 
+           # background
+          curPlot <- drawDimensionVectors(helperValues$projectionMatrix, highlightedIdx(), highlightedCat(), highlightedCatValue(),  helperValues$cumulativeList )
+          
+          # hovering 
+          if (!is.null(helperValues$lbl))  curPlot <- curPlot + helperValues$lbl
+          
+          # hints
+          if (!is.null(helperValues$hints))   curPlot <- curPlot + helperValues$hints
+
+          # actual points ... also add the limit so that the movement doesn't re-scales the image everytime 
           curPlot + getGGProjectedPoints(helperValues$projectionMatrix, helperValues$rangedData , odata, colorVar) +
           coord_cartesian(xlim = c(-helperValues$plotLimit,helperValues$plotLimit ), ylim = c(-helperValues$plotLimit,helperValues$plotLimit ))
       },res=96)
@@ -237,13 +259,13 @@ StarCoordinates <- function(df, colorVar = NULL,  approach="Standard", numericRe
              }
       })
 
+      # helping events ... zooming and out to an extent and create a screenshot of a current state
       onevent("mouseup", "plot", mouseUp())
       onevent("mousedown","plot", mouseDown())
-      
-
       observeEvent(input$zoomIn,{ helperValues$plotLimit <-  helperValues$plotLimit*0.9 })
       observeEvent(input$zoomOut,{ helperValues$plotLimit <-  helperValues$plotLimit*1.1 })
       observeEvent(input$screenShot, { screenshot()})
+      
       observeEvent(input$done, {
         projMatrix <- getCleanProjectionMatrix(helperValues$projectionMatrix, colorVar, odata, df)
         projectedPoints <- getProjectedPoints(helperValues$projectionMatrix, helperValues$rangedData )

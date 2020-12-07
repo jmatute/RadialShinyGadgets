@@ -8,7 +8,7 @@ Authors@R: person("José", "Matute", email = "jmatuteflores@gmail.com",
 URL: https://github.com/jmatute/StarCoordinates-RShinyGadget
 Imports: import, ggplot2, tidyr, dplyr, miniUI, shiny, shinyjs, caret, rlang, shinyscreenshot
 Maintainer: José Matute <jmatuteflores@gmail.com>
-Description: A package containing interactive gadgets of the Star Coordinates Plot and variances thereof.
+Description: A package containing shiny-based interactive gadgets of radial visualization methods such as Star Coordinates, RadVis, Orthographic Star Coordinates... and several extensions thereof.
 License: MIT + file LICENCE 
 Encoding: UTF-8
 LazyData: true
