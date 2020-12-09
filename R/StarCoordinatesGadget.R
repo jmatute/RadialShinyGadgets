@@ -30,8 +30,16 @@
 #' @param projMatrix a pre-defined projection matrix as an initial configuration. Should be defined in the same fashion as the output
 #' @param clusterFunc function to define hints, assume increase in value of the function is an increase in quality of the projection. The function will be called with two parameters (points, labels)
 #' @return A list with the projection matrix, coordinates of the projected samples and a logical vector with the selected samples
+#' @references 
+#' Kandogan, E. (2001, August). Visualizing multi-dimensional clusters, trends, and outliers using star coordinates. In Proceedings of the seventh ACM SIGKDD international conference on Knowledge discovery and data mining (pp. 107-116).
+#' 
+#' Lehmann, D. J., & Theisel, H. (2013). Orthographic star coordinates. IEEE Transactions on Visualization and Computer Graphics, 19(12), 2615-2624.
+#' 
+#' Rubio-Sánchez, M., & Sanchez, A. (2014). Axis calibration for improving data attribute estimation in star coordinates plots. IEEE transactions on visualization and computer graphics, 20(12), 2013-202
+#' 
+#' Matute, J., & Linsen, L. (2020, February). Hinted Star Coordinates for Mixed Data. In Computer Graphics Forum (Vol. 39, No. 1, pp. 117-133).
+#' 
 #' @export
-
 #' @examples
 #' if (interactive()) {
 #'  library(RadialVisGadgets)
@@ -39,6 +47,7 @@
 #'  data(iris)
 #'  StarCoordinates(iris, "Species")
 #' }
+#' 
 StarCoordinates <- function(df, color = NULL,  approach="Standard", numericRepresentation=TRUE, meanCentered = TRUE, projMatrix=NULL, clusterFunc = NULL) {
 
   #######################################################################
@@ -46,7 +55,7 @@ StarCoordinates <- function(df, color = NULL,  approach="Standard", numericRepre
   # won't change throughout the running of the gadget
   colorVar <- color #prefer nomenclature for the parameters as color, but semantically prefer colorVar
   # check for simple errors and stop in case error if bad enough
-  inputCheck <- inputValidation(df,  colorVar,  approach, projMatrix, clusterFunc )
+  inputCheck <- inputValidationSC(df,  colorVar,  approach, projMatrix, clusterFunc )
   if (!is.null(inputCheck)){
       if (inputCheck$stop)  stop(inputCheck$errorMessage)
       else warning(inputCheck$errorMessage)

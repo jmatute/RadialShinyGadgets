@@ -10,6 +10,9 @@ The original Star Coordinates as proposed by Kandogan [1] along with optional ax
 
 Other extensions for the approach are implemented. Hints [4]  and Orthographic Star Coordinates [2].
 
+## RadViz
+
+An implementation of the traditional RadViz as presented in [5]. 
 
 ## Installation
 
@@ -38,6 +41,8 @@ This package is free and open source software, licensed under [MIT licence](http
 
 3. Rubio-Sánchez, M., & Sanchez, A. (2014). Axis calibration for improving data attribute estimation in star coordinates plots. IEEE transactions on visualization and computer graphics, 20(12), 2013-2022
 
-4. Matute, J., & Linsen, L. (2020). Hinted Star Coordinates for Mixed Data. In Computer Graphics Forum (Vs for Radial Visualizations.
+4. Matute, J., & Linsen, L. (2020, February). Hinted Star Coordinates for Mixed Data. In Computer Graphics Forum (Vol. 39, No. 1, pp. 117-133).
+
+5. Sharko, J., Grinstein, G., & Marx, K. A. (2008). Vectorized radviz and its application to multiple cluster datasets. IEEE transactions on Visualization and Computer Graphics, 14(6), 1444-1427.
 
 

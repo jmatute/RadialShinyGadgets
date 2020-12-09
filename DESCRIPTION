@@ -1,11 +1,11 @@
 Package: RadialVisGadgets
 Type: Package
-Title: Gadgets for Radial Visualization Approaches
+Title: Interactive Gadgets for Radial Visualization Approaches
 Version: 0.1.0
 Author: José Matute
 Authors@R: person("José", "Matute", email = "jmatuteflores@gmail.com", 
   role = c("aut", "cre"))
-URL: https://github.com/jmatute/StarCoordinates-RShinyGadget
+URL: https://github.com/jmatute/RadialShinyGadgets
 Imports: import, ggplot2, tidyr, dplyr, miniUI, shiny, shinyjs, caret, rlang, shinyscreenshot
 Maintainer: José Matute <jmatuteflores@gmail.com>
 Description: A package containing shiny-based interactive gadgets of radial visualization methods such as Star Coordinates, RadVis, Orthographic Star Coordinates... and several extensions thereof.

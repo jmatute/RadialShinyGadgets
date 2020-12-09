@@ -17,7 +17,8 @@ library(knitr)
 
 The RadialVisGadgets package provides interactive Shiny gadgets for interactive radial visualizations. By interacting with the gadgets, Exploratory Data Analysis can be performed. The gadgets can be used at any time during the analysis. They allow the exploration of the underlying nature of the data in tasks related to cluster analysis, outlier detection, and exploratory data analysis, e.g., by investigating the effect of specific dimensions on the separation of the data.
 
-[Star Coordinates](#Star)
+*[Star Coordinates](#Star)
+*[RadViz](#Radviz)
 
 ### Star Coordinates {#Star}
 
@@ -119,7 +120,7 @@ StarCoordinates(iris, colorVar="Species", clusterFunc = func)
 ![*Hints on Star Coordinates *](./imgs/iris_hints.png)
 
 
-### Notes On Data Processing 
+#### Notes On Data Processing 
 
 * **Missing Data:** Only complete-cases are used i.e. rows where data is missing are removed
 * **Zero Variance:** Zero or close to zero variance dimensions are removed.
@@ -131,6 +132,55 @@ StarCoordinates(iris, colorVar="Species", clusterFunc = func)
 3. Lehmann, D. J., & Theisel, H. (2013). Orthographic star coordinates. IEEE Transactions on Visualization and Computer Graphics, 19(12), 2615-2624.
 4. Matute, J., & Linsen, L. (2020). Hinted Star Coordinates for Mixed Data. In Computer Graphics Forum (Vol. 39, No. 1, pp. 117-133).
 5. Rubio-Sánchez, M., & Sanchez, A. (2014). Axis calibration for improving data attribute estimation in star coordinates plots. IEEE transactions on visualization and computer graphics, 20(12), 2013-2022
+
+
+### RadViz {#RadViz}
+
+RadViz's  goal is to generate a configuration which reveals the underlying nature of the data for cluster analysis, outlier detection, and exploratory data analysis, e.g., by investigating the effect of specific dimensions on the separation of the data.  
+Each dimension is assigned to a point known as dimensional anchors across a unit-circle.  Each sample is projected according to the 
+relative attraction to each of the anchors. We will follow with the iris dataset.
+
+```{r, eval=FALSE}
+irisWOCat <- iris
+irisWOCat["Species"] <- NULL 
+RadViz(irisWOCat)
+
+
+```
+
+![*Initial Configuration *](./imgs/radviz_iris_st.png)
+
+RadViz is not defined for non-numerical dimensions and given it's non-linear behavior for the projection generation it would be "even more" misleading to convert the factors to numeric. As with Star Coordinates, we can interact in order to change the projection. The anchors represented by the circles can be moved around the unit circle. 
+
+![*Moving Anchors](./imgs/radviz_iris_mov.png)
+
+
+However, even a factor dimension can be used for the coloring the points according to a label. This can be done by supplying the name of the column as a color.
+
+```{r, eval=FALSE}
+RadViz(iris, "Species )
+
+```
+
+![*RadViz with labels](./imgs/radviz_labels.png)
+
+#### Buttons
+
+**Done:** Once a selection is done. One can press the *Done* button, the RadViz Gadget will return a list given the anchor locations, a logical vector of the selection and the projection points (in 2D).
+
+**Screenshot:** Takes a screenshot of the configuration at its current state
+
+**Zoom in/out:** Self-explanatory. Zooms in and out of the plot
+
+
+#### Notes On Data Processing 
+
+* **Missing Data:** Only complete-cases are used i.e. rows where data is missing are removed
+* **Zero Variance:** Zero or close to zero variance dimensions are removed.
+* **Scaling:** If the values are scaled from 0..1.
+
+1. Sharko, J., Grinstein, G., & Marx, K. A. (2008). Vectorized radviz and its application to multiple cluster datasets. IEEE transactions on Visualization and Computer Graphics, 14(6), 1444-1427.
+
 
 
 
