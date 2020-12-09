@@ -2,7 +2,6 @@ Package: RadialVisGadgets
 Type: Package
 Title: Interactive Gadgets for Radial Visualization Approaches
 Version: 0.2.0
-Author: José Matute
 Authors@R: person("José", "Matute", email = "jmatuteflores@gmail.com", 
   role = c("aut", "cre"))
 URL: https://github.com/jmatute/RadialShinyGadgets
