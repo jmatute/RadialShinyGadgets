@@ -1,7 +1,6 @@
 ---
 title: "Radial Vis Gadgets"
 author: "Jose Matute"
-date: "12/1/2020"
 output: rmarkdown::html_vignette
 vignette: >
   %\VignetteIndexEntry{Radial Vis Gadgets}
@@ -17,8 +16,9 @@ library(knitr)
 
 The RadialVisGadgets package provides interactive Shiny gadgets for interactive radial visualizations. By interacting with the gadgets, Exploratory Data Analysis can be performed. The gadgets can be used at any time during the analysis. They allow the exploration of the underlying nature of the data in tasks related to cluster analysis, outlier detection, and exploratory data analysis, e.g., by investigating the effect of specific dimensions on the separation of the data.
 
-*[Star Coordinates](#Star)
-*[RadViz](#Radviz)
+* [Star Coordinates](#Star)
+
+* [RadViz](#Radviz)
 
 ### Star Coordinates {#Star}
 
@@ -134,7 +134,7 @@ StarCoordinates(iris, colorVar="Species", clusterFunc = func)
 5. Rubio-Sánchez, M., & Sanchez, A. (2014). Axis calibration for improving data attribute estimation in star coordinates plots. IEEE transactions on visualization and computer graphics, 20(12), 2013-2022
 
 
-### RadViz {#RadViz}
+### RadViz {#Radviz}
 
 RadViz's  goal is to generate a configuration which reveals the underlying nature of the data for cluster analysis, outlier detection, and exploratory data analysis, e.g., by investigating the effect of specific dimensions on the separation of the data.  
 Each dimension is assigned to a point known as dimensional anchors across a unit-circle.  Each sample is projected according to the 
